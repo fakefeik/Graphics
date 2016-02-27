@@ -30,5 +30,10 @@ namespace Graphics.ViewModel
         protected virtual void OnDispose()
         {
         }
+
+        public virtual void OnKeyDown(object sender)
+        {
+            throw new Exception(sender.ToString());
+        }
     }
 }

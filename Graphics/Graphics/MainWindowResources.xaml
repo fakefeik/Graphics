@@ -7,6 +7,9 @@
     <DataTemplate DataType="{x:Type vm:ChartViewModel}">
         <vw:ChartView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:RendererViewModel}">
+        <vw:RendererView />
+    </DataTemplate>
 
     <DataTemplate x:Key="TasksTemplate">
         <StackPanel Background="Gray">
@@ -17,22 +20,12 @@
                 </Style>
             </StackPanel.Resources>
             <ItemsControl ItemsSource="{Binding}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Button Command="{Binding Command}" Content="{Binding DisplayName}"/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Command="{Binding Command}" Content="{Binding DisplayName}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </StackPanel>
-    </DataTemplate>
-    
-    <DataTemplate x:Key="ParamsTemplate">
-        <ItemsControl ItemsSource="{Binding}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
     </DataTemplate>
 </ResourceDictionary>
