@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using SharpDX;
 
 namespace Graphics.Model
@@ -69,7 +65,7 @@ namespace Graphics.Model
             Vertices = vertices.ToArray();
             Faces = faces.ToArray();
             ComputeFacesNormals();
-            Texture = new Texture("", 0, 0);
+            Texture = new Texture();
         }
 
         private float TryGetResult(Func<float, float, float> f, float x, float y)

@@ -110,7 +110,7 @@ namespace Graphics
                     // Texture
                     var meshTextureId = jsonObject.meshes[meshIndex].materialId.Value;
                     var meshTextureName = materials[meshTextureId].DiffuseTextureName;
-                    mesh.Texture = new Texture(meshTextureName, 512, 512);
+                    mesh.Texture = new Texture(meshTextureName);
                 }
 
                 mesh.ComputeFacesNormals();

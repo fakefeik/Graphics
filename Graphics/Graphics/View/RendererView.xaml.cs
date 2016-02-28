@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -18,13 +19,21 @@ namespace Graphics.View
     /// </summary>
     public partial class RendererView : UserControl
     {
-        private RendererViewModel _model;
+        private readonly RendererViewModel _model;
         private Mesh[] _meshes;
-        private bool dragInProgress = false;
-        private Point lastPosition;
-        private Camera _camera = new Camera {Up = new Vector3(0, 1, 0)};
+        private bool _dragInProgress;
+        private Point _lastPosition;
+
         private DateTime _previousDate;
-        private Collection<double> _lastFpsValues = new Collection<double>();
+        private readonly Collection<double> _lastFpsValues = new Collection<double>();
+
+        private readonly Camera _camera = new Camera
+        {
+            Position = new Vector3(0, 0, 10.0f),
+            Target = Vector3.Zero,
+            Up = new Vector3(0, 1, 0)
+        };
+
         public RendererView()
         {
             _model = new RendererViewModel();
@@ -41,37 +50,31 @@ namespace Graphics.View
             window.MouseMove += WindowOnMouseMove;
             
             CompositionTarget.Rendering += CompositionTargetOnRendering;
-            _meshes = JsonModelLoader.LoadJsonFile("monkey.babylon");
+            _meshes = JsonModelLoader.LoadJsonFile("Mesh/sphere.babylon");
+            //_meshes[0].Texture = new Texture("Mesh/yoba.png");
             //_meshes = new List<Mesh>(_meshes) {new Plane(1, 1, 2, 2, (x, y) => (float) (Math.Cos(x) * Math.Cos(y)))}.ToArray();
             //_meshes = new[] { new Plane(2, 2, 10, 10, (x, y) => x * y) };
             //_meshes = new[] {new Plane(1, 1, 5, 5, (f, f1) => 0)};
-            //_meshes[0].Rotation = Vector3.Down;
-            
-            _camera.Position = new Vector3(0, 0, 10.0f);
-            _camera.Target = Vector3.Zero;
-            _camera.Move(Vector3.Zero);
-            _camera.Rotate(Vector2.Zero);
         }
 
         private void WindowOnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            dragInProgress = true;
-            lastPosition = e.GetPosition(this);
+            _dragInProgress = true;
+            _lastPosition = e.GetPosition(this);
         }
 
         private void WindowOnMouseMove(object sender, MouseEventArgs e)
         {
-            if (dragInProgress)
-            {
-                var position = e.GetPosition(this);
-                _camera.Rotate(new Vector2((float) (position.X - lastPosition.X)/100, -(float) (position.Y - lastPosition.Y)/100));
-                lastPosition = e.GetPosition(this);
-            }
+            if (!_dragInProgress)
+                return;
+            var position = e.GetPosition(this);
+            _camera.Rotate(new Vector2((float) (position.X - _lastPosition.X)/100, -(float) (position.Y - _lastPosition.Y)/100));
+            _lastPosition = e.GetPosition(this);
         }
 
         private void WindowOnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            dragInProgress = false;
+            _dragInProgress = false;
         }
 
         private void HandleKeyPress(object sender, KeyEventArgs e)
@@ -102,11 +105,7 @@ namespace Graphics.View
             {
                 _lastFpsValues.RemoveAt(0);
                 _lastFpsValues.Add(currentFps);
-                var totalValues = 0d;
-                for (var i = 0; i < _lastFpsValues.Count; i++)
-                {
-                    totalValues += _lastFpsValues[i];
-                }
+                var totalValues = _lastFpsValues.Sum();
 
                 var averageFps = totalValues / _lastFpsValues.Count;
                 AverageFps.Text = $"average {averageFps:0.00} Fps";
@@ -115,12 +114,8 @@ namespace Graphics.View
             _model.Clear(0, 0, 0, 255);
 
             foreach (var mesh in _meshes)
-            {
-                // rotating slightly the meshes during each frame rendered
                 //mesh.Rotation = new Vector3(mesh.Rotation.X + 0.01f, mesh.Rotation.Y + 0.01f, mesh.Rotation.Z);
                 mesh.Rotation = new Vector3(mesh.Rotation.X, mesh.Rotation.Y + 0.01f, mesh.Rotation.Z);
-                //mesh.Position = new Vector3(0, 0, (float)(5 * Math.Cos(alpha)));
-            }
 
             _model.Render(_camera, _meshes);
             _model.Present();

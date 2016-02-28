@@ -3,12 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:graphics="clr-namespace:Graphics"
+             xmlns:i="clr-namespace:Graphics"
              mc:Ignorable="d" 
              Focusable="True"
              Loaded="RendererView_OnLoaded"
-             graphics:InputBindingBehavior.PropagateInputBindingsToWindow="True"
+             i:InputBindingBehavior.PropagateInputBindingsToWindow="True"
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.InputBindings>
+        <MouseBinding Gesture="{x:Static i:MouseWheelGesture.CtrlDown}" Command="{Binding ChangeResolutionCommand}" CommandParameter="1"/>
+        <MouseBinding Gesture="{x:Static i:MouseWheelGesture.CtrlUp}" Command="{Binding ChangeResolutionCommand}" CommandParameter="-1"/>
+    </UserControl.InputBindings>
     <Grid Background="Black">
         <Image Source="{Binding ImageSource}"/>
         <TextBlock x:Name="Fps" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" Foreground="White"/>

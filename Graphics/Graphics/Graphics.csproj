@@ -139,7 +139,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="monkey.babylon">
+    <None Include="Mesh\monkey.babylon">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Mesh\sphere.babylon">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
@@ -158,6 +161,16 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\task3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Mesh\Suzanne.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Mesh\yoba.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\SharpDX.2.6.0\build\SharpDX.targets" Condition="Exists('..\packages\SharpDX.2.6.0\build\SharpDX.targets')" />

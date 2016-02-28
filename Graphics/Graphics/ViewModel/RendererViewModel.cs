@@ -1,24 +1,28 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Graphics.Model;
 using SharpDX;
 using Matrix = SharpDX.Matrix;
 using PixelFormat = System.Windows.Media.PixelFormat;
+using Point = System.Drawing.Point;
 
 namespace Graphics.ViewModel
 {
     class RendererViewModel : BaseViewModel
     {
+        public ICommand ChangeResolutionCommand { get; private set; }
+
         private PixelFormat pf = PixelFormats.Rgb24;
         private int rawStride;
         private byte[] backBuffer;
-        private readonly float[] depthBuffer;
+        private float[] depthBuffer;
         private object[] lockBuffer;
         private WriteableBitmap bmp;
-        private readonly int width;
-        private readonly int height;
+        private int width;
+        private int height;
 
         private BitmapSource _imageSource;
         public BitmapSource ImageSource
@@ -36,11 +40,32 @@ namespace Graphics.ViewModel
 
         public RendererViewModel()
         {
-            width = 512;
-            height = 512;
+            ChangeResolutionCommand = new RelayCommand(o =>
+            {
+                if ((string)o == "-1")
+                {
+                    if (width >= 256 && height >= 256)
+                    {
+                        InitializeBitmapResolution(width / 2, height / 2);
+                    }
+                }
+                else
+                {
+                    if (width < 1024 && height < 1024)
+                    {
+                        InitializeBitmapResolution(width*2, height*2);
+                    }
+                }
+            });
 
+            InitializeBitmapResolution(512, 512);
+        }
+
+        private void InitializeBitmapResolution(int width, int height)
+        {
+            this.width = width;
+            this.height = height;
             rawStride = (width * pf.BitsPerPixel + 7) / 8;
-
             backBuffer = new byte[rawStride * height];
             depthBuffer = new float[width * height];
             lockBuffer = new object[width * height];
@@ -64,7 +89,6 @@ namespace Graphics.ViewModel
         public void PutPixel(int x, int y, float z, Color4 color)
         {
             var index = x + y * width;
-            var index4 = index * 4;
 
             lock (lockBuffer[index])
             {
@@ -74,25 +98,12 @@ namespace Graphics.ViewModel
                 }
 
                 depthBuffer[index] = z;
-
-                //backBuffer[index4] = (byte)(color.Blue * 255);
-                //backBuffer[index4 + 1] = (byte)(color.Green * 255);
-                //backBuffer[index4 + 2] = (byte)(color.Red * 255);
-                //backBuffer[index4 + 3] = (byte)(color.Alpha * 255);
                 SetPixel(x, y, color);
             }
         }
 
         public void Clear(byte r, byte g, byte b, byte a)
         {
-            //for (var index = 0; index < backBuffer.Length; index += 4)
-            //{
-            //    backBuffer[index] = b;
-            //    backBuffer[index + 1] = g;
-            //    backBuffer[index + 2] = r;
-            //    backBuffer[index + 3] = a;
-            //}
-
             for (int i = 0; i < width; i++)
                 for (int j = 0; j < height; j++)
                     SetPixel(i, j, new Color4(r/255.0f, g/255.0f, b/255.0f, a/255.0f));

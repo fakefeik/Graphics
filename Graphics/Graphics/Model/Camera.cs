@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows;
 using SharpDX;
 
 namespace Graphics.Model
@@ -10,8 +9,8 @@ namespace Graphics.Model
         public Vector3 Target { get; set; }
         public Vector3 Up { get; set; }
 
-        private float horizontalAngle = (float) Math.PI;
-        private float verticalAngle = 0;
+        private float _horizontalAngle = (float) Math.PI;
+        private float _verticalAngle;
 
         public void Move(Vector3 v)
         {
@@ -24,15 +23,15 @@ namespace Graphics.Model
 
         public void Rotate(Vector2 rotation)
         {
-            horizontalAngle += rotation.X;
-            verticalAngle += rotation.Y;
+            _horizontalAngle += rotation.X;
+            _verticalAngle += rotation.Y;
 
-            var sinH = (float) Math.Sin(horizontalAngle);
-            var cosH = (float) Math.Cos(horizontalAngle);
-            var sinV = (float) Math.Sin(verticalAngle);
-            var cosV = (float) Math.Cos(verticalAngle);
+            var sinH = (float) Math.Sin(_horizontalAngle);
+            var cosH = (float) Math.Cos(_horizontalAngle);
+            var sinV = (float) Math.Sin(_verticalAngle);
+            var cosV = (float) Math.Cos(_verticalAngle);
             var direction = new Vector3(cosV * sinH, sinV, cosV * cosH);
-            var right = new Vector3((float) Math.Sin(horizontalAngle - Math.PI / 2), 0, (float) Math.Cos(horizontalAngle - Math.PI / 2));
+            var right = new Vector3((float) Math.Sin(_horizontalAngle - Math.PI / 2), 0, (float) Math.Cos(_horizontalAngle - Math.PI / 2));
 
             Up = Vector3.Cross(right, direction);
             Target = Position + direction;
