@@ -3,18 +3,52 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Graphics.Model;
+using Newtonsoft.Json;
 using SharpDX;
 
 namespace Graphics
 {
     public class JsonModelLoader
     {
-        public static Mesh[] LoadJsonFile(string fileName)
+        public static Mesh LoadMesh(string filename)
+        {
+            var data = File.ReadAllText(filename);
+            dynamic jsonObject = JsonConvert.DeserializeObject(data);
+            var jsonMesh = jsonObject.meshes[0];
+            var positions = jsonMesh.positions.ToObject<float[]>();
+            var normals = jsonMesh.normals.ToObject<float[]>();
+            var uvs = jsonMesh.uvs.ToObject<float[]>();
+            var indices = jsonMesh.indices.ToObject<int[]>();
+
+
+            var facesCount = indices.Length / 3;
+            var verticesCount = positions.Length / 3;
+            var mesh = new Mesh(jsonObject.meshes[0].name.Value, verticesCount, facesCount);
+            for (int i = 0; i < verticesCount; i++)
+                mesh.Vertices[i] = new Vertex
+                {
+                    Coordinates = new Vector3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]),
+                    Normal = new Vector3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]),
+                    TextureCoordinates = new Vector2(uvs[i * 2], uvs[i *2 + 1])
+                };
+
+            for (int i = 0; i < facesCount; i++)
+                mesh.Faces[i] = new Face
+                {
+                    A = indices[i * 3],
+                    B = indices[i * 3 + 1],
+                    C = indices[i * 3 + 2] 
+                };
+
+            return mesh;
+        }
+
+        public static Mesh[] LoadJsonFile(string filename)
         {
             var meshes = new List<Mesh>();
             var materials = new Dictionary<String, Material>();
-            var data = File.ReadAllText(fileName);
-            dynamic jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject(data);
+            var data = File.ReadAllText(filename);
+            dynamic jsonObject = JsonConvert.DeserializeObject(data);
 
             for (var materialIndex = 0; materialIndex < jsonObject.materials.Count; materialIndex++)
             {

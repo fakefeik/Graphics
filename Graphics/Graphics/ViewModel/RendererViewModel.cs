@@ -23,14 +23,14 @@ namespace Graphics.ViewModel
         private WriteableBitmap bmp;
         private int width;
         private int height;
-
+        public bool Wireframe { get; set; }
+        public string ImageName { get; set; }
+        public string TaskName { get; set; }
         private BitmapSource _imageSource;
+
         public BitmapSource ImageSource
         {
-            get
-            {
-                return _imageSource;
-            }
+            get { return _imageSource; }
             private set
             {
                 _imageSource = value;
@@ -38,15 +38,17 @@ namespace Graphics.ViewModel
             }
         }
 
-        public RendererViewModel()
+        public RendererViewModel(string s)
         {
+            TaskName = s;
+            ImageName = $"../Images/{s}.png";
             ChangeResolutionCommand = new RelayCommand(o =>
             {
-                if ((string)o == "-1")
+                if ((string) o == "-1")
                 {
                     if (width >= 256 && height >= 256)
                     {
-                        InitializeBitmapResolution(width / 2, height / 2);
+                        InitializeBitmapResolution(width/2, height/2);
                     }
                 }
                 else
@@ -65,10 +67,10 @@ namespace Graphics.ViewModel
         {
             this.width = width;
             this.height = height;
-            rawStride = (width * pf.BitsPerPixel + 7) / 8;
-            backBuffer = new byte[rawStride * height];
-            depthBuffer = new float[width * height];
-            lockBuffer = new object[width * height];
+            rawStride = (width*pf.BitsPerPixel + 7)/8;
+            backBuffer = new byte[rawStride*height];
+            depthBuffer = new float[width*height];
+            lockBuffer = new object[width*height];
             for (var i = 0; i < lockBuffer.Length; i++)
             {
                 lockBuffer[i] = new object();
@@ -88,14 +90,12 @@ namespace Graphics.ViewModel
 
         public void PutPixel(int x, int y, float z, Color4 color)
         {
-            var index = x + y * width;
+            var index = x + y*width;
 
             lock (lockBuffer[index])
             {
                 if (depthBuffer[index] < z)
-                {
                     return; // Discard
-                }
 
                 depthBuffer[index] = z;
                 SetPixel(x, y, color);
@@ -120,7 +120,7 @@ namespace Graphics.ViewModel
         public void DrawPoint(Vector3 point, Color4 color)
         {
             if (point.X >= 0 && point.Y >= 0 && point.X < width && point.Y < height)
-                PutPixel((int)point.X, (int)point.Y, point.Z, color);
+                PutPixel((int) point.X, (int) point.Y, point.Z, color);
         }
 
         private float Clamp(float value, float min = 0, float max = 1)
@@ -130,7 +130,7 @@ namespace Graphics.ViewModel
 
         private float Interpolate(float min, float max, float gradient)
         {
-            return min + (max - min) * Clamp(gradient);
+            return min + (max - min)*Clamp(gradient);
         }
 
         public Vertex Project(Vertex vertex, Matrix transMat, Matrix world)
@@ -139,8 +139,8 @@ namespace Graphics.ViewModel
             var point3DWorld = Vector3.TransformCoordinate(vertex.Coordinates, world);
             var normal3DWorld = Vector3.TransformCoordinate(vertex.Normal, world);
 
-            var x = point2D.X * width + width / 2.0f;
-            var y = -point2D.Y * height + height / 2.0f;
+            var x = point2D.X*width + width/2.0f;
+            var y = -point2D.Y*height + height/2.0f;
 
             return new Vertex
             {
@@ -161,18 +161,19 @@ namespace Graphics.ViewModel
             return Math.Max(0, Vector3.Dot(normal, lightDirection));
         }
 
-        private void ProcessScanLine(ScanLineData data, Vertex va, Vertex vb, Vertex vc, Vertex vd, Color4 color, Texture texture)
+        private void ProcessScanLine(ScanLineData data, Vertex va, Vertex vb, Vertex vc, Vertex vd, Color4 color,
+            Texture texture)
         {
             var pa = va.Coordinates;
             var pb = vb.Coordinates;
             var pc = vc.Coordinates;
             var pd = vd.Coordinates;
 
-            var gradient1 = pa.Y != pb.Y ? (data.currentY - pa.Y) / (pb.Y - pa.Y) : 1;
-            var gradient2 = pc.Y != pd.Y ? (data.currentY - pc.Y) / (pd.Y - pc.Y) : 1;
+            var gradient1 = pa.Y != pb.Y ? (data.currentY - pa.Y)/(pb.Y - pa.Y) : 1;
+            var gradient2 = pc.Y != pd.Y ? (data.currentY - pc.Y)/(pd.Y - pc.Y) : 1;
 
-            var sx = (int)Interpolate(pa.X, pb.X, gradient1);
-            var ex = (int)Interpolate(pc.X, pd.X, gradient2);
+            var sx = (int) Interpolate(pa.X, pb.X, gradient1);
+            var ex = (int) Interpolate(pc.X, pd.X, gradient2);
 
             var z1 = Interpolate(pa.Z, pb.Z, gradient1);
             var z2 = Interpolate(pc.Z, pd.Z, gradient2);
@@ -187,7 +188,7 @@ namespace Graphics.ViewModel
 
             for (var x = sx; x < ex; x++)
             {
-                var gradient = (x - sx) / (float)(ex - sx);
+                var gradient = (x - sx)/(float) (ex - sx);
 
                 var z = Interpolate(z1, z2, gradient);
                 var ndotl = Interpolate(snl, enl, gradient);
@@ -195,8 +196,39 @@ namespace Graphics.ViewModel
                 var v = Interpolate(sv, ev, gradient);
 
                 var textureColor = texture?.Map(u, v) ?? new Color4(1, 1, 1, 1);
+                DrawPoint(new Vector3(x, data.currentY, z), color*ndotl*textureColor);
+            }
+        }
 
-                DrawPoint(new Vector3(x, data.currentY, z), color * ndotl * textureColor);
+        public void DrawBline(Vector3 point0, Vector3 point1, Color4 color)
+        {
+            int x0 = (int) point0.X;
+            int y0 = (int) point0.Y;
+            int x1 = (int) point1.X;
+            int y1 = (int) point1.Y;
+
+            var dx = Math.Abs(x1 - x0);
+            var dy = Math.Abs(y1 - y0);
+            var sx = (x0 < x1) ? 1 : -1;
+            var sy = (y0 < y1) ? 1 : -1;
+            var err = dx - dy;
+
+            while (true)
+            {
+                DrawPoint(new Vector3(x0, y0, point0.Z), color);
+
+                if ((x0 == x1) && (y0 == y1)) break;
+                var e2 = 2*err;
+                if (e2 > -dy)
+                {
+                    err -= dy;
+                    x0 += sx;
+                }
+                if (e2 < dx)
+                {
+                    err += dx;
+                    y0 += sy;
+                }
             }
         }
 
@@ -237,17 +269,17 @@ namespace Graphics.ViewModel
 
             float dP1P2, dP1P3;
             if (p2.Y - p1.Y > 0)
-                dP1P2 = (p2.X - p1.X) / (p2.Y - p1.Y);
+                dP1P2 = (p2.X - p1.X)/(p2.Y - p1.Y);
             else
                 dP1P2 = 0;
 
             if (p3.Y - p1.Y > 0)
-                dP1P3 = (p3.X - p1.X) / (p3.Y - p1.Y);
+                dP1P3 = (p3.X - p1.X)/(p3.Y - p1.Y);
             else
                 dP1P3 = 0;
             if (dP1P2 > dP1P3)
             {
-                for (var y = (int)p1.Y; y <= (int)p3.Y; y++)
+                for (var y = (int) p1.Y; y <= (int) p3.Y; y++)
                 {
                     data.currentY = y;
 
@@ -293,7 +325,7 @@ namespace Graphics.ViewModel
             }
             else
             {
-                for (var y = (int)p1.Y; y <= (int)p3.Y; y++)
+                for (var y = (int) p1.Y; y <= (int) p3.Y; y++)
                 {
                     data.currentY = y;
 
@@ -342,15 +374,15 @@ namespace Graphics.ViewModel
         public void Render(Camera camera, params Mesh[] meshes)
         {
             var viewMatrix = Matrix.LookAtLH(camera.Position, camera.Target, camera.Up);
-            var projectionMatrix = Matrix.PerspectiveFovLH(0.78f, (float)width / height, 0.01f, 1.0f);
+            var projectionMatrix = Matrix.PerspectiveFovLH(0.78f, (float) width/height, 0.01f, 1.0f);
 
             foreach (var mesh in meshes)
             {
-                var worldMatrix = Matrix.RotationYawPitchRoll(mesh.Rotation.Y, mesh.Rotation.X, mesh.Rotation.Z) *
+                var worldMatrix = Matrix.RotationYawPitchRoll(mesh.Rotation.Y, mesh.Rotation.X, mesh.Rotation.Z)*
                                   Matrix.Translation(mesh.Position);
 
-                var worldView = worldMatrix * viewMatrix;
-                var transformMatrix = worldView * projectionMatrix;
+                var worldView = worldMatrix*viewMatrix;
+                var transformMatrix = worldView*projectionMatrix;
 
                 Parallel.For(0, mesh.Faces.Length, faceIndex =>
                 {
@@ -375,7 +407,18 @@ namespace Graphics.ViewModel
 
                     //var color = 0.25f + (faceIndex % mesh.Faces.Length) * 0.75f / mesh.Faces.Length;
                     var color = 1.0f;
-                    DrawTriangle(pixelA, pixelB, pixelC, new Color4(color, color, color, 1), mesh.Texture);
+
+
+                    if (Wireframe)
+                    {
+                        DrawBline(pixelA.Coordinates, pixelB.Coordinates, new Color4(color, color, color, 1));
+                        DrawBline(pixelB.Coordinates, pixelC.Coordinates, new Color4(color, color, color, 1));
+                        DrawBline(pixelC.Coordinates, pixelA.Coordinates, new Color4(color, color, color, 1));
+                    }
+                    else
+                    {
+                        DrawTriangle(pixelA, pixelB, pixelC, new Color4(color, color, color, 1), mesh.Texture);
+                    }
                 });
             }
         }

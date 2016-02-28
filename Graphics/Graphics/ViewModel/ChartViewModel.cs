@@ -65,6 +65,11 @@ namespace Graphics.ViewModel
                 InitializeParams(new string[0]);
                 Draw = DrawParabola;
             }
+            else
+            {
+                InitializeParams(new string[0]);
+                Draw = c => { };
+            }
             ImageName = $"../Images/{s}.png";
             InitializeBitmapResolution(512, 512);
             PixelsHorizontal = 10;
@@ -181,7 +186,7 @@ namespace Graphics.ViewModel
             {
                 graphics.DrawImage(bitmapSource, new Rect(0, 0, width, height));
                 for (
-                    int i = Center.X%PixelsHorizontal + PixelsHorizontal,
+                    int i = Center.X%PixelsHorizontal,
                         j = -(width - Center.X%PixelsHorizontal)/PixelsHorizontal/2;
                     i < width;
                     i += PixelsHorizontal)
@@ -191,7 +196,7 @@ namespace Graphics.ViewModel
                             new Typeface("Segoe UI"), PixelsHorizontal*0.7, Brushes.Black),
                         new System.Windows.Point(i, -1));
                 for (
-                    int i = Center.Y%PixelsVertical + PixelsVertical,
+                    int i = Center.Y%PixelsVertical,
                         j = (height - Center.Y%PixelsVertical)/PixelsVertical/2;
                     i < width;
                     i += PixelsVertical)

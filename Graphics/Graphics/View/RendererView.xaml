@@ -6,16 +6,24 @@
              xmlns:i="clr-namespace:Graphics"
              mc:Ignorable="d" 
              Focusable="True"
-             Loaded="RendererView_OnLoaded"
+             DataContextChanged="RendererView_OnDataContextChanged"
+             Unloaded="RendererView_OnUnloaded"
              i:InputBindingBehavior.PropagateInputBindingsToWindow="True"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.InputBindings>
         <MouseBinding Gesture="{x:Static i:MouseWheelGesture.CtrlDown}" Command="{Binding ChangeResolutionCommand}" CommandParameter="1"/>
         <MouseBinding Gesture="{x:Static i:MouseWheelGesture.CtrlUp}" Command="{Binding ChangeResolutionCommand}" CommandParameter="-1"/>
     </UserControl.InputBindings>
-    <Grid Background="Black">
-        <Image Source="{Binding ImageSource}"/>
-        <TextBlock x:Name="Fps" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" Foreground="White"/>
-        <TextBlock x:Name="AverageFps" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10" Foreground="White"/>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80*"></RowDefinition>
+            <RowDefinition Height="20*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Background="Black">
+            <Image Source="{Binding ImageSource}"/>
+            <TextBlock x:Name="Fps" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" Foreground="White"/>
+            <TextBlock x:Name="AverageFps" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10" Foreground="White"/>
+        </Grid>
+        <Image Grid.Row="1" Source="{Binding ImageName}"/>
     </Grid>
 </UserControl>

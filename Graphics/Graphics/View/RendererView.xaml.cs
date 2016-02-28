@@ -19,13 +19,16 @@ namespace Graphics.View
     /// </summary>
     public partial class RendererView : UserControl
     {
-        private readonly RendererViewModel _model;
+        private RendererViewModel _model;
         private Mesh[] _meshes;
         private bool _dragInProgress;
         private Point _lastPosition;
 
         private DateTime _previousDate;
         private readonly Collection<double> _lastFpsValues = new Collection<double>();
+        private string taskName;
+
+        private Window window;
 
         private readonly Camera _camera = new Camera
         {
@@ -36,29 +39,40 @@ namespace Graphics.View
 
         public RendererView()
         {
-            _model = new RendererViewModel();
-            DataContext = _model;
             InitializeComponent();
         }
 
-        private void RendererView_OnLoaded(object sender, RoutedEventArgs e)
+        private void RenderView_OnLoaded(object sender, EventArgs e)
         {
+            _model = (RendererViewModel)DataContext;
+            taskName = _model.TaskName;
+
             var window = Window.GetWindow(this);
             window.KeyDown += HandleKeyPress;
             window.MouseDown += WindowOnMouseDown;
             window.MouseUp += WindowOnMouseUp;
             window.MouseMove += WindowOnMouseMove;
-            
+
             CompositionTarget.Rendering += CompositionTargetOnRendering;
-            _meshes = JsonModelLoader.LoadJsonFile("Mesh/sphere.babylon");
-            //_meshes[0].Texture = new Texture("Mesh/yoba.png");
-            //_meshes = new List<Mesh>(_meshes) {new Plane(1, 1, 2, 2, (x, y) => (float) (Math.Cos(x) * Math.Cos(y)))}.ToArray();
-            //_meshes = new[] { new Plane(2, 2, 10, 10, (x, y) => x * y) };
-            //_meshes = new[] {new Plane(1, 1, 5, 5, (f, f1) => 0)};
+            if (taskName == "Task6")
+            {
+                _meshes = new[] { JsonModelLoader.LoadMesh("Mesh/cylinder.babylon") };
+                _meshes[0].Texture = new Texture("Mesh/yoba.png");
+            }
+            else
+            {
+                _meshes = new[] { new Plane(10, 10, 20, 20, (x, y) => (float)(Math.Cos(x) * Math.Cos(y))) };
+                _meshes[0].Rotation = new Vector3((float)Math.PI / 2, 0, 0);
+                _model.Wireframe = true;
+            }
         }
 
         private void WindowOnMouseDown(object sender, MouseButtonEventArgs e)
         {
+#if DEBUG
+            if (e.ChangedButton == MouseButton.Right)
+                _model.Wireframe = !_model.Wireframe;
+#endif
             _dragInProgress = true;
             _lastPosition = e.GetPosition(this);
         }
@@ -113,12 +127,55 @@ namespace Graphics.View
 
             _model.Clear(0, 0, 0, 255);
 
-            foreach (var mesh in _meshes)
-                //mesh.Rotation = new Vector3(mesh.Rotation.X + 0.01f, mesh.Rotation.Y + 0.01f, mesh.Rotation.Z);
-                mesh.Rotation = new Vector3(mesh.Rotation.X, mesh.Rotation.Y + 0.01f, mesh.Rotation.Z);
+            if (taskName == "Task6")
+                foreach (var mesh in _meshes)
+                    //mesh.Rotation = new Vector3(mesh.Rotation.X + 0.01f, mesh.Rotation.Y + 0.01f, mesh.Rotation.Z);
+                    mesh.Rotation = new Vector3(mesh.Rotation.X, mesh.Rotation.Y + 0.01f, mesh.Rotation.Z);
 
             _model.Render(_camera, _meshes);
             _model.Present();
+        }
+
+        private void RendererView_OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            CompositionTarget.Rendering -= CompositionTargetOnRendering;
+            if (window != null)
+            {
+                window.KeyDown -= HandleKeyPress;
+                window.MouseDown -= WindowOnMouseDown;
+                window.MouseUp -= WindowOnMouseUp;
+                window.MouseMove -= WindowOnMouseMove;
+            }
+        }
+
+        private void RendererView_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            RendererView_OnUnloaded(sender, null);
+
+            _model = (RendererViewModel)DataContext;
+            if (_model == null)
+                return;
+            taskName = _model.TaskName;
+
+            window = Window.GetWindow(this);
+
+            window.KeyDown += HandleKeyPress;
+            window.MouseDown += WindowOnMouseDown;
+            window.MouseUp += WindowOnMouseUp;
+            window.MouseMove += WindowOnMouseMove;
+
+            CompositionTarget.Rendering += CompositionTargetOnRendering;
+            if (taskName == "Task6")
+            {
+                _meshes = new[] { JsonModelLoader.LoadMesh("Mesh/cylinder.babylon") };
+                _meshes[0].Texture = new Texture("Mesh/yoba.png");
+            }
+            else
+            {
+                _meshes = new[] { new Plane(10, 10, 20, 20, (x, y) => (float)(Math.Cos(x) * Math.Cos(y))) };
+                _meshes[0].Rotation = new Vector3((float)Math.PI / 2, 0, 0);
+                _model.Wireframe = true;
+            }
         }
     }
 }
