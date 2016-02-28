@@ -330,7 +330,7 @@ namespace Graphics.ViewModel
 
         public void Render(Camera camera, params Mesh[] meshes)
         {
-            var viewMatrix = Matrix.LookAtLH(camera.Position, camera.Target, Vector3.UnitY);
+            var viewMatrix = Matrix.LookAtLH(camera.Position, camera.Target, camera.Up);
             var projectionMatrix = Matrix.PerspectiveFovLH(0.78f, (float)width / height, 0.01f, 1.0f);
 
             foreach (var mesh in meshes)
