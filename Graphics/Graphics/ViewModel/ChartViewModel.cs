@@ -187,7 +187,7 @@ namespace Graphics.ViewModel
                 graphics.DrawImage(bitmapSource, new Rect(0, 0, width, height));
                 for (
                     int i = Center.X%PixelsHorizontal,
-                        j = -(width - Center.X%PixelsHorizontal)/PixelsHorizontal/2;
+                        j = -Center.X/PixelsHorizontal;
                     i < width;
                     i += PixelsHorizontal)
                     graphics.DrawText(
@@ -197,7 +197,7 @@ namespace Graphics.ViewModel
                         new System.Windows.Point(i, -1));
                 for (
                     int i = Center.Y%PixelsVertical,
-                        j = (height - Center.Y%PixelsVertical)/PixelsVertical/2;
+                        j = Center.Y/PixelsVertical;
                     i < width;
                     i += PixelsVertical)
                     graphics.DrawText(
@@ -271,7 +271,7 @@ namespace Graphics.ViewModel
                 }
                 SetPixel(i, y, chartColor);
                 if (i != 0)
-                    Line(i - 1, previousY, i, y, chartColor);
+                    Algorithm.Line(i - 1, previousY, i, y, chartColor, SetPixel);
                 previousY = double.IsInfinity(res) ? (secondResult > 0 ? 0 : height - 1) : y;
             }
         }
@@ -296,7 +296,7 @@ namespace Graphics.ViewModel
                 var yActual = (int) (y*PixelsVertical + Center.Y);
 
                 SetPixel(xActual, yActual, chartColor);
-                Line(previousX, previousY, xActual, yActual, chartColor);
+                Algorithm.Line(previousX, previousY, xActual, yActual, chartColor, SetPixel);
                 previousX = xActual;
                 previousY = yActual;
             }
@@ -304,100 +304,34 @@ namespace Graphics.ViewModel
 
         private void DrawParabola(Color color)
         {
-            int p = 2;
-            int x0 = 0;
-            int y0 = 0;
-            int Sh, Sv, Sd;
-            int y = y0;
-            int x = x0;
-            Sd = (y + 1) * (y + 1) - 2 * p * (x + 1);
-            Sv = (y + 1) * (y + 1) - 2 * p * x;
-            Sh = y * y - 2 * p * (x + 1);
-            SetPixel(x0 * PixelsHorizontal + width / 2, y0 * PixelsVertical + height / 2, color);
-            while (x + x0 < width/PixelsHorizontal/2) //пока полотно не кончится
+            var lines = new List<Tuple<Point, Point>>();
+            var previousY = Center.Y;
+            var previousNegativeY = previousY;
+            Func<double, double> function = x => Math.Sqrt(2*x);
+            for (int x = Center.X + 1; x < width; x++)
             {
-                if (Math.Abs(Sh) - Math.Abs(Sv) <= 0)
-                {
-                    if (Math.Abs(Sd) - Math.Abs(Sh) < 0)
-                        y++;
-                    x++;
-                }
-                else
-                {
-                    if (Math.Abs(Sv) - Math.Abs(Sd) > 0)
-                        x++;
-                    y++;
-                }
-
-                SetPixel((x + x0) * PixelsHorizontal + width / 2, (y + y0) * PixelsVertical + height / 2, color);
-                SetPixel((x + x0) * PixelsHorizontal + width / 2, -(y + y0) * PixelsVertical + height / 2, color);
-                Sd = (y + 1) * (y + 1) - 2 * p * (x + 1);
-                Sv = (y + 1) * (y + 1) - 2 * p * x;
-                Sh = y * y - 2 * p * (x + 1);
+                var xActual = (x - Center.X) / (double)PixelsHorizontal;
+                var yActual = function(xActual);
+                var y = (int) (yActual*PixelsVertical + Center.Y);
+                var yNegative = (int) (-yActual*PixelsVertical + Center.Y);
+                lines.Add(new Tuple<Point, Point>(new Point(x - 1, previousY), new Point(x, y)));
+                lines.Add(new Tuple<Point, Point>(new Point(x - 1, previousNegativeY), new Point(x, yNegative)));
+                previousY = y;
+                previousNegativeY = yNegative;
             }
+
+            foreach (var line in lines)
+                Algorithm.Line(line.Item1.X, line.Item1.Y, line.Item2.X, line.Item2.Y, color, SetPixel);
         }
 
         private void DrawAxis(Color axisColor, Color linesColor)
         {
             for (int i = Center.X%PixelsHorizontal; i < width; i += PixelsHorizontal)
-                Line(i, 0, i, height, linesColor);
+                Algorithm.Line(i, 0, i, height, linesColor, SetPixel);
             for (int i = Center.Y%PixelsVertical; i < height; i += PixelsVertical)
-                Line(0, i, width, i, linesColor);
-            Line(0, Center.Y, width, Center.Y, axisColor);
-            Line(Center.X, 0, Center.X, height, axisColor);
-        }
-
-        private void Line(float x1, float y1, float x2, float y2, Color color)
-        {
-            // Bresenham's line algorithm
-            var steep = Math.Abs(y2 - y1) > Math.Abs(x2 - x1);
-            float temp;
-            if (steep)
-            {
-                temp = x1;
-                x1 = y1;
-                y1 = temp;
-
-                temp = x2;
-                x2 = y2;
-                y2 = temp;
-            }
-
-            if (x1 > x2)
-            {
-                temp = x1;
-                x1 = x2;
-                x2 = temp;
-
-                temp = y1;
-                y1 = y2;
-                y2 = temp;
-            }
-
-            var dx = x2 - x1;
-            var dy = Math.Abs(y2 - y1);
-
-            var error = dx/2.0f;
-            var ystep = y1 < y2 ? 1 : -1;
-            var y = (int) y1;
-
-            var maxX = (int) x2;
-
-            for (int x = (int) x1; x < maxX; x++)
-            {
-                if (steep)
-                    SetPixel(y, x, color);
-                else
-                    SetPixel(x, y, color);
-
-                error -= dy;
-
-                if (error < 0)
-                {
-                    y += ystep;
-                    error += dx;
-                }
-            }
+                Algorithm.Line(0, i, width, i, linesColor, SetPixel);
+            Algorithm.Line(0, Center.Y, width, Center.Y, axisColor, SetPixel);
+            Algorithm.Line(Center.X, 0, Center.X, height, axisColor, SetPixel);
         }
     }
 }

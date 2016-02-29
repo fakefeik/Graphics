@@ -15,14 +15,13 @@ namespace Graphics.ViewModel
 
         private List<TaskViewModel> CreateTasks()
         {
-            var tasks = Enumerable.Range(1, 4)
+            var tasks = Enumerable.Range(1, 3)
                 .Select(
                     x =>
                         new TaskViewModel($"Task {x}",
                             new RelayCommand(o => CurrentViewModel = new ChartViewModel($"Task{x}")))).ToList();
+            tasks.Add(new TaskViewModel("Task 4", new RelayCommand(o => CurrentViewModel = new PolyViewModel("Task4"))));
             tasks.AddRange(Enumerable.Range(5, 2).Select(x => new TaskViewModel($"Task {x}", new RelayCommand(o => CurrentViewModel = new RendererViewModel($"Task{x}")))));
-            //tasks[4] = new TaskViewModel("Task 5", new RelayCommand(o => CurrentViewModel = new RendererViewModel()));
-            //tasks[5] = new TaskViewModel("Task 6", new RelayCommand(o => CurrentViewModel = new RendererViewModel()));
             return tasks;
         }
 

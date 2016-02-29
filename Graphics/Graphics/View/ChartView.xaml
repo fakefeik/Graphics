@@ -24,8 +24,8 @@
     </UserControl.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="75*" />
-            <RowDefinition Height="25*" />
+            <RowDefinition Height="80*" />
+            <RowDefinition Height="20*" />
         </Grid.RowDefinitions>
         <Image Grid.Row="0" Source="{Binding ImageSource}"></Image>
         <Grid Grid.Row="1">

@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Graphics.Model;
 using SharpDX;
+using Color = System.Drawing.Color;
 using Matrix = SharpDX.Matrix;
 using PixelFormat = System.Windows.Media.PixelFormat;
 using Point = System.Drawing.Point;
@@ -20,9 +21,10 @@ namespace Graphics.ViewModel
         private byte[] backBuffer;
         private float[] depthBuffer;
         private object[] lockBuffer;
-        private WriteableBitmap bmp;
+
         private int width;
         private int height;
+
         public bool Wireframe { get; set; }
         public string ImageName { get; set; }
         public string TaskName { get; set; }
@@ -79,13 +81,11 @@ namespace Graphics.ViewModel
 
         private void SetPixel(int x, int y, Color4 color)
         {
-
             var xIndex = x*3;
             var yIndex = y*rawStride;
             backBuffer[xIndex + yIndex] = (byte) (color.Red*255);
             backBuffer[xIndex + yIndex + 1] = (byte) (color.Green*255);
             backBuffer[xIndex + yIndex + 2] = (byte) (color.Blue*255);
-
         }
 
         public void PutPixel(int x, int y, float z, Color4 color)
@@ -121,6 +121,11 @@ namespace Graphics.ViewModel
         {
             if (point.X >= 0 && point.Y >= 0 && point.X < width && point.Y < height)
                 PutPixel((int) point.X, (int) point.Y, point.Z, color);
+        }
+
+        private void DrawPoint(int x, int y, Color c)
+        {
+            DrawPoint(new Vector3(x, y, 0), new Color4(c.R/255.0f, c.G/255.0f, c.B/255.0f, c.A/255.0f));
         }
 
         private float Clamp(float value, float min = 0, float max = 1)
@@ -197,38 +202,6 @@ namespace Graphics.ViewModel
 
                 var textureColor = texture?.Map(u, v) ?? new Color4(1, 1, 1, 1);
                 DrawPoint(new Vector3(x, data.currentY, z), color*ndotl*textureColor);
-            }
-        }
-
-        public void DrawBline(Vector3 point0, Vector3 point1, Color4 color)
-        {
-            int x0 = (int) point0.X;
-            int y0 = (int) point0.Y;
-            int x1 = (int) point1.X;
-            int y1 = (int) point1.Y;
-
-            var dx = Math.Abs(x1 - x0);
-            var dy = Math.Abs(y1 - y0);
-            var sx = (x0 < x1) ? 1 : -1;
-            var sy = (y0 < y1) ? 1 : -1;
-            var err = dx - dy;
-
-            while (true)
-            {
-                DrawPoint(new Vector3(x0, y0, point0.Z), color);
-
-                if ((x0 == x1) && (y0 == y1)) break;
-                var e2 = 2*err;
-                if (e2 > -dy)
-                {
-                    err -= dy;
-                    x0 += sx;
-                }
-                if (e2 < dx)
-                {
-                    err += dx;
-                    y0 += sy;
-                }
             }
         }
 
@@ -411,9 +384,12 @@ namespace Graphics.ViewModel
 
                     if (Wireframe)
                     {
-                        DrawBline(pixelA.Coordinates, pixelB.Coordinates, new Color4(color, color, color, 1));
-                        DrawBline(pixelB.Coordinates, pixelC.Coordinates, new Color4(color, color, color, 1));
-                        DrawBline(pixelC.Coordinates, pixelA.Coordinates, new Color4(color, color, color, 1));
+                        Algorithm.Line(pixelA.Coordinates.X, pixelA.Coordinates.Y, pixelB.Coordinates.X,
+                            pixelB.Coordinates.Y, Color.White, DrawPoint);
+                        Algorithm.Line(pixelB.Coordinates.X, pixelB.Coordinates.Y, pixelC.Coordinates.X,
+                            pixelC.Coordinates.Y, Color.White, DrawPoint);
+                        Algorithm.Line(pixelC.Coordinates.X, pixelC.Coordinates.Y, pixelA.Coordinates.X,
+                            pixelA.Coordinates.Y, Color.White, DrawPoint);
                     }
                     else
                     {

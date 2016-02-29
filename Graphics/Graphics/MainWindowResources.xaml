@@ -10,6 +10,9 @@
     <DataTemplate DataType="{x:Type vm:RendererViewModel}">
         <vw:RendererView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:PolyViewModel}">
+        <vw:PolyView></vw:PolyView>
+    </DataTemplate>
 
     <DataTemplate x:Key="TasksTemplate">
         <StackPanel Background="Gray">

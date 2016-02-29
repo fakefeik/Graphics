@@ -67,6 +67,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Algorithm.cs" />
     <Compile Include="InputBindings.cs" />
     <Compile Include="JsonModelLoader.cs" />
     <Compile Include="Model\Camera.cs" />
@@ -83,11 +84,15 @@
     <Compile Include="ViewModel\ChartViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\ParamsViewModel.cs" />
+    <Compile Include="ViewModel\PolyViewModel.cs" />
     <Compile Include="ViewModel\RendererViewModel.cs" />
     <Compile Include="ViewModel\TaskViewModel.cs" />
     <Compile Include="ViewModel\BaseViewModel.cs" />
     <Compile Include="View\ChartView.xaml.cs">
       <DependentUpon>ChartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\PolyView.xaml.cs">
+      <DependentUpon>PolyView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\RendererView.xaml.cs">
       <DependentUpon>RendererView.xaml</DependentUpon>
@@ -109,6 +114,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\ChartView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\PolyView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

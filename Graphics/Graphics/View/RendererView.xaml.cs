@@ -26,9 +26,9 @@ namespace Graphics.View
 
         private DateTime _previousDate;
         private readonly Collection<double> _lastFpsValues = new Collection<double>();
-        private string taskName;
+        private string _taskName;
 
-        private Window window;
+        private Window _window;
 
         private readonly Camera _camera = new Camera
         {
@@ -40,31 +40,6 @@ namespace Graphics.View
         public RendererView()
         {
             InitializeComponent();
-        }
-
-        private void RenderView_OnLoaded(object sender, EventArgs e)
-        {
-            _model = (RendererViewModel)DataContext;
-            taskName = _model.TaskName;
-
-            var window = Window.GetWindow(this);
-            window.KeyDown += HandleKeyPress;
-            window.MouseDown += WindowOnMouseDown;
-            window.MouseUp += WindowOnMouseUp;
-            window.MouseMove += WindowOnMouseMove;
-
-            CompositionTarget.Rendering += CompositionTargetOnRendering;
-            if (taskName == "Task6")
-            {
-                _meshes = new[] { JsonModelLoader.LoadMesh("Mesh/cylinder.babylon") };
-                _meshes[0].Texture = new Texture("Mesh/yoba.png");
-            }
-            else
-            {
-                _meshes = new[] { new Plane(10, 10, 20, 20, (x, y) => (float)(Math.Cos(x) * Math.Cos(y))) };
-                _meshes[0].Rotation = new Vector3((float)Math.PI / 2, 0, 0);
-                _model.Wireframe = true;
-            }
         }
 
         private void WindowOnMouseDown(object sender, MouseButtonEventArgs e)
@@ -127,7 +102,7 @@ namespace Graphics.View
 
             _model.Clear(0, 0, 0, 255);
 
-            if (taskName == "Task6")
+            if (_taskName == "Task6")
                 foreach (var mesh in _meshes)
                     //mesh.Rotation = new Vector3(mesh.Rotation.X + 0.01f, mesh.Rotation.Y + 0.01f, mesh.Rotation.Z);
                     mesh.Rotation = new Vector3(mesh.Rotation.X, mesh.Rotation.Y + 0.01f, mesh.Rotation.Z);
@@ -139,12 +114,12 @@ namespace Graphics.View
         private void RendererView_OnUnloaded(object sender, RoutedEventArgs e)
         {
             CompositionTarget.Rendering -= CompositionTargetOnRendering;
-            if (window != null)
+            if (_window != null)
             {
-                window.KeyDown -= HandleKeyPress;
-                window.MouseDown -= WindowOnMouseDown;
-                window.MouseUp -= WindowOnMouseUp;
-                window.MouseMove -= WindowOnMouseMove;
+                _window.KeyDown -= HandleKeyPress;
+                _window.MouseDown -= WindowOnMouseDown;
+                _window.MouseUp -= WindowOnMouseUp;
+                _window.MouseMove -= WindowOnMouseMove;
             }
         }
 
@@ -155,17 +130,17 @@ namespace Graphics.View
             _model = (RendererViewModel)DataContext;
             if (_model == null)
                 return;
-            taskName = _model.TaskName;
+            _taskName = _model.TaskName;
 
-            window = Window.GetWindow(this);
+            _window = Window.GetWindow(this);
 
-            window.KeyDown += HandleKeyPress;
-            window.MouseDown += WindowOnMouseDown;
-            window.MouseUp += WindowOnMouseUp;
-            window.MouseMove += WindowOnMouseMove;
+            _window.KeyDown += HandleKeyPress;
+            _window.MouseDown += WindowOnMouseDown;
+            _window.MouseUp += WindowOnMouseUp;
+            _window.MouseMove += WindowOnMouseMove;
 
             CompositionTarget.Rendering += CompositionTargetOnRendering;
-            if (taskName == "Task6")
+            if (_taskName == "Task6")
             {
                 _meshes = new[] { JsonModelLoader.LoadMesh("Mesh/cylinder.babylon") };
                 _meshes[0].Texture = new Texture("Mesh/yoba.png");
