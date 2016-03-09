@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace Graphics
 {
@@ -61,12 +62,17 @@ namespace Graphics
 
         public static bool IsInBoundingBox(List<Point> poly, int x, int y)
         {
-            if (poly == null)
+            if (poly == null || poly.Count == 0)
                 return false;
-            return true;
+
+            var leftmost = poly.Min(p => p.X);
+            var rightmost = poly.Max(p => p.X);
+            var upmost = poly.Min(p => p.Y);
+            var downmost = poly.Max(p => p.Y);
+            return x >= leftmost && x <= rightmost && y >= upmost && y <= downmost;
         }
 
-        public static bool IsInPolygon(List<Point> poly, int x, int y)
+        public static bool IsInPolygon(List<Point> poly, float x, float y)
         {
             var locatedInPolygon = false;
             for (int i = 0; i < poly.Count; i++)
@@ -78,8 +84,8 @@ namespace Graphics
                 float vertex2X = poly[j].X;
                 float vertex2Y = poly[j].Y;
 
-                float testX = x;
-                float testY = y;
+                var testX = x;
+                var testY = y;
 
                 var belowLowY = vertex1Y > testY;
                 var belowHighY = vertex2Y > testY;
@@ -92,7 +98,7 @@ namespace Graphics
                     var slopeOfLine = (vertex2X - vertex1X) / (vertex2Y - vertex1Y);
 
                     // this looks up the x-coord of a point lying on the above line, given its y-coord
-                    var pointOnLine = (slopeOfLine * (testY - vertex1Y)) + vertex1X;
+                    var pointOnLine = slopeOfLine * (testY - vertex1Y) + vertex1X;
 
                     //checks to see if x-coord of testPoint is smaller than the point on the line with the same y-coord
                     var isLeftToLine = testX < pointOnLine;

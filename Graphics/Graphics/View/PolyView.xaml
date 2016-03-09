@@ -3,12 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Graphics.View"
+             xmlns:i="clr-namespace:Graphics"
              Focusable="True"
              Loaded="PolyView_OnLoaded"
              Unloaded="PolyView_OnUnloaded"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="300"
+             i:InputBindingBehavior.PropagateInputBindingsToWindow="True">
+    <UserControl.InputBindings>
+        <MouseBinding Gesture="{x:Static i:MouseWheelGesture.CtrlDown}" Command="{Binding ChangeResolutionCommand}" CommandParameter="1"/>
+        <MouseBinding Gesture="{x:Static i:MouseWheelGesture.CtrlUp}" Command="{Binding ChangeResolutionCommand}" CommandParameter="-1"/>
+    </UserControl.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80*"/>

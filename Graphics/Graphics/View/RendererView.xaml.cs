@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using Graphics.Model;
 using Graphics.ViewModel;
 using SharpDX;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Plane = Graphics.Model.Plane;
 using Point = System.Windows.Point;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace Graphics.View
 {
@@ -147,7 +150,8 @@ namespace Graphics.View
             }
             else
             {
-                _meshes = new[] { new Plane(10, 10, 20, 20, (x, y) => (float)(Math.Cos(x) * Math.Cos(y))) };
+                _meshes = new Mesh[] { new Plane(10, 10, 20, 20, 20, (x, y) => (float)(Math.Cos(x) * Math.Cos(y))) };
+                _meshes[0].Texture = new Texture("Mesh/wireframe.png");
                 _meshes[0].Rotation = new Vector3((float)Math.PI / 2, 0, 0);
                 _model.Wireframe = true;
             }

@@ -6,7 +6,7 @@ namespace Graphics.Model
 {
     public class Plane : Mesh
     {
-        public Plane(float width, float height, int widthSegments, int heightSegments, Func<float, float, float> f)
+        public Plane(float width, float height, int widthSegments, int heightSegments, int tex, Func<float, float, float> f)
         {
             var vertices = new List<Vertex>();
             var faces = new List<Face>();
@@ -40,7 +40,7 @@ namespace Graphics.Model
                     {
                         Coordinates = new Vector3(vX, vY, TryGetResult(f, vX, vY)),
                         Normal = new Vector3(N[0], N[1], N[2]),
-                        TextureCoordinates = new Vector2(x / widthSegments, 1 - y / heightSegments)
+                        TextureCoordinates = new Vector2((float) x / widthSegments * tex, 1 - y / (float) heightSegments * tex)
                     });
 
                     var n = y * (widthSegments + 1) + x;

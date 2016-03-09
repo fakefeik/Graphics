@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Drawing;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Color = System.Drawing.Color;
@@ -9,6 +10,7 @@ namespace Graphics.ViewModel
 {
     public class PolyViewModel : BaseViewModel
     {
+        public ICommand ChangeResolutionCommand { get; private set; }
         public string ImageName { get; set; }
 
         private BitmapSource _imageSource;
@@ -33,6 +35,25 @@ namespace Graphics.ViewModel
         public PolyViewModel(string s)
         {
             ImageName = $"../Images/{s}.png";
+            ChangeResolutionCommand = new RelayCommand(o =>
+            {
+                if ((string)o == "-1")
+                {
+                    if (Width >= 256 && Height >= 256)
+                    {
+                        InitializeBitmapResolution(Width / 2, Height / 2);
+                        //DrawChart();
+                    }
+                }
+                else
+                {
+                    if (Width < 1024 && Height < 1024)
+                    {
+                        InitializeBitmapResolution(Width * 2, Height * 2);
+                        //DrawChart();
+                    }
+                }
+            });
             InitializeBitmapResolution(512, 512);
             Update();
         }

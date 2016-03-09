@@ -53,7 +53,18 @@ namespace Graphics.ViewModel
             if (s == "Task1")
             {
                 InitializeParams(new[] {"A", "B"});
-                Draw = DrawFunction;
+                Draw = color => DrawFunction(color, (x, p) =>
+                {
+                    try
+                    {
+                        var subsquare = p[0]*x*x/(x + p[1]);
+                        return Math.Sign(subsquare)*Math.Pow(Math.Abs(subsquare), 1/3.0);
+                    }
+                    catch (Exception)
+                    {
+                        return 0;
+                    }
+                });
             }
             else if (s == "Task2")
             {
@@ -62,8 +73,9 @@ namespace Graphics.ViewModel
             }
             else if (s == "Task3")
             {
-                InitializeParams(new string[0]);
-                Draw = DrawParabola;
+                InitializeParams(new[] {"A", "B", "C"});
+                //Draw = DrawParabola;
+                Draw = color => DrawFunction(color, (x, p) => p[0]*x*x + p[1]*x + p[2]);
             }
             else
             {
@@ -233,20 +245,8 @@ namespace Graphics.ViewModel
             return x >= 0 && x < width && y >= 0 && y < height;
         }
 
-        private void DrawFunction(Color chartColor)
+        private void DrawFunction(Color chartColor, Func<double, List<double>, double> function)
         {
-            Func<double, List<double>, double> function = (x, p) =>
-            {
-                try
-                {
-                    var subsquare = p[0]*x*x/(x + p[1]);
-                    return Math.Sign(subsquare)*Math.Pow(Math.Abs(subsquare), 1/3.0);
-                }
-                catch (Exception)
-                {
-                    return 0;
-                }
-            };
             var previousY = 0;
             var param = Params.Select(p => (double)p.Parameter.Value).ToList();
             for (int i = 0; i < width; i++)
@@ -304,10 +304,12 @@ namespace Graphics.ViewModel
 
         private void DrawParabola(Color color)
         {
+            if (Params[0].Parameter.Value < 0)
+                return;
             var lines = new List<Tuple<Point, Point>>();
             var previousY = Center.Y;
             var previousNegativeY = previousY;
-            Func<double, double> function = x => Math.Sqrt(2*x);
+            Func<double, double> function = x => Math.Sqrt(2*Params[0].Parameter.Value*x);
             for (int x = Center.X + 1; x < width; x++)
             {
                 var xActual = (x - Center.X) / (double)PixelsHorizontal;
