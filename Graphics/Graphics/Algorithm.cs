@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using SharpDX;
+using Color = System.Drawing.Color;
+using Point = System.Drawing.Point;
 
 namespace Graphics
 {
@@ -60,7 +63,7 @@ namespace Graphics
             }
         }
 
-        public static bool IsInBoundingBox(List<Point> poly, int x, int y)
+        public static bool IsInBoundingBox(List<PointF> poly, float x, float y)
         {
             if (poly == null || poly.Count == 0)
                 return false;
@@ -72,17 +75,17 @@ namespace Graphics
             return x >= leftmost && x <= rightmost && y >= upmost && y <= downmost;
         }
 
-        public static bool IsInPolygon(List<Point> poly, float x, float y)
+        public static bool IsInPolygon(List<PointF> poly, float x, float y)
         {
             var locatedInPolygon = false;
             for (int i = 0; i < poly.Count; i++)
             {
                 var j = (i + 1)%poly.Count;
 
-                float vertex1X = poly[i].X;
-                float vertex1Y = poly[i].Y;
-                float vertex2X = poly[j].X;
-                float vertex2Y = poly[j].Y;
+                var vertex1X = poly[i].X;
+                var vertex1Y = poly[i].Y;
+                var vertex2X = poly[j].X;
+                var vertex2Y = poly[j].Y;
 
                 var testX = x;
                 var testY = y;
@@ -110,5 +113,69 @@ namespace Graphics
 
             return locatedInPolygon;
         }
+
+        public static void GetHorizons(Vector3 cameraPosition, Vector2 windowSize, int windowStart, int screenStep, int xMax,
+            int xMin, int zMax, int zMin, int zStep, Func<double, double, double> function)
+        {
+            var cameraDirection = cameraPosition/Vector3.Normalize(cameraPosition);
+            var rightVector = Vector3.Cross(new Vector3(cameraDirection.X, 0, cameraDirection.Z), new Vector3(0, 1, 0));
+            rightVector /= Vector3.Normalize(rightVector);
+            var cameraHPlaneNormal = Vector3.Cross(rightVector, cameraDirection);
+            cameraHPlaneNormal /= Vector3.Normalize(cameraHPlaneNormal);
+            IEnumerable<float> horizonDistances = Range(zMin, zMax, zStep);
+            if (cameraPosition[2] > (zMin + zMax)/2.0)
+                horizonDistances = horizonDistances.Reverse();
+            var screenXPositions = Range(-windowSize[0]/2, windowSize[0]/2, screenStep);
+            var lowerBuffer = 0;
+        }
+
+        private static float[] Range(float start, float end, float step)
+        {
+            var values = new List<float>();
+            for (var i = start; i < end; i += step)
+                values.Add(i);
+            return values.ToArray();
+        }
+
+    //lower_buffer = np.array(screen_x_positions)
+    //higher_buffer = np.array(screen_x_positions)
+    //lower_buffer[:] = np.NAN
+    //higher_buffer[:] = np.NAN
+    //for horizon_distance in horizon_distances:
+    //    horizon = np.array(screen_x_positions)
+    //    horizon[:] = np.NAN
+    //    for i in range(screen_x_positions.shape[0]):
+    //        screen_x = screen_x_positions[i]
+    //        ray_start = np.array([camera_position[0], 0, camera_position[2]]) + screen_x* right_vector
+    //        x_intersection = ray_start[0] - (ray_start[2] - horizon_distance)*camera_direction[0]/camera_direction[2]
+    //        if x_intersection > x_max or x_intersection<x_min:
+    //            continue
+    //        function_value = function(x_intersection, horizon_distance)
+    //        camera_h_plane_intersection_y = \
+    //                -((x_intersection - camera_position[0])*camera_h_plane_normal[0] + \
+    //                (horizon_distance - camera_position[2])*camera_h_plane_normal[2])/\
+    //                camera_h_plane_normal[1] + camera_position[1]
+    //        screen_y = np.array([x_intersection, function_value - camera_h_plane_intersection_y, horizon_distance]).dot(
+    //                camera_h_plane_normal)
+    //        if np.isnan(higher_buffer[i]) or screen_y > higher_buffer[i]:
+    //            higher_buffer[i] = screen_y
+    //            horizon[i] = screen_y
+    //        if np.isnan(lower_buffer[i]) or screen_y<lower_buffer[i]:
+    //            lower_buffer[i] = screen_y
+    //            horizon[i] = screen_y
+    //    #with printoptions(precision=3, suppress=True):
+    //    #    print(horizon)
+    //    #with printoptions(precision=3, suppress=True):
+    //    #    print(screen_x_positions)
+    //    horizon = window_start[1] + window_size[1] / 2 - horizon
+    //    screen_x_positions_shifted = screen_x_positions + window_start[0] + window_size[0] / 2
+    //    #print()
+    //    segments = []
+    //    for i in range(1, screen_x_positions.shape[0]):
+    //        if not np.isnan(horizon[i]) and not np.isnan(horizon[i - 1]):
+    //            segments.append(
+    //                    (screen_x_positions_shifted[i - 1], horizon[i - 1], screen_x_positions_shifted[i], horizon[i]))
+    //    yield segments
+
     }
 }

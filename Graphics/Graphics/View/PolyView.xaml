@@ -5,23 +5,39 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="clr-namespace:Graphics"
              Focusable="True"
-             Loaded="PolyView_OnLoaded"
-             Unloaded="PolyView_OnUnloaded"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300"
+             d:DesignHeight="500" d:DesignWidth="500"
              i:InputBindingBehavior.PropagateInputBindingsToWindow="True">
     <UserControl.InputBindings>
+        <KeyBinding Key="Left" Command="{Binding MoveCommand}" CommandParameter="left"/>
+        <KeyBinding Key="Right" Command="{Binding MoveCommand}" CommandParameter="right"/>
+        <KeyBinding Key="Up" Command="{Binding MoveCommand}" CommandParameter="up"/>
+        <KeyBinding Key="Down" Command="{Binding MoveCommand}" CommandParameter="down"/>
+
+        <MouseBinding Gesture="{x:Static i:MouseWheelGesture.Down}" Command="{Binding ScaleCommand}" CommandParameter="1"/>
+        <MouseBinding Gesture="{x:Static i:MouseWheelGesture.Up}" Command="{Binding ScaleCommand}" CommandParameter="-1"/>
+
         <MouseBinding Gesture="{x:Static i:MouseWheelGesture.CtrlDown}" Command="{Binding ChangeResolutionCommand}" CommandParameter="1"/>
         <MouseBinding Gesture="{x:Static i:MouseWheelGesture.CtrlUp}" Command="{Binding ChangeResolutionCommand}" CommandParameter="-1"/>
     </UserControl.InputBindings>
-    <Grid>
+    <Grid Name="Grid" MouseDown="Grid_OnMouseDown" Focusable="True">
         <Grid.RowDefinitions>
             <RowDefinition Height="80*"/>
             <RowDefinition Height="20*"/>
         </Grid.RowDefinitions>
-        <Grid Background="Black">
-            <Image x:Name="Image" Grid.Row="0" Source="{Binding ImageSource}"/>
+        <Image Grid.Row="0" x:Name="Image" Source="{Binding ImageSource}"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50*"/>
+                <ColumnDefinition Width="50*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Polygon 1"/>
+                <TextBox Name="Poly1" Text="{Binding Poly1}"/>
+                <TextBlock Text="Polygon 2"/>
+                <TextBox Name="Poly2" Text="{Binding Poly2}"/>
+            </StackPanel>
+            <Image Grid.Column="1" Source="{Binding ImageName}"/>
         </Grid>
-        <Image Grid.Row="1" Source="{Binding ImageName}"/>
     </Grid>
 </UserControl>
