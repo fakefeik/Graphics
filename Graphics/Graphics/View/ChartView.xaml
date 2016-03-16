@@ -27,7 +27,7 @@
             <RowDefinition Height="80*" />
             <RowDefinition Height="20*" />
         </Grid.RowDefinitions>
-        <Image Grid.Row="0" Source="{Binding ImageSource}"></Image>
+        <Image Grid.Row="0" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding ImageSource}"></Image>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50*"/>
