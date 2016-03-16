@@ -23,8 +23,8 @@ namespace Graphics.ViewModel
         public ICommand ChangeResolutionCommand { get; private set; }
         public ICommand MoveCommand { get; private set; }
 
-        private string _poly1 = "[[-40, 10], [-20, 30], [30, 20], [-5, 0]]";
-        private string _poly2 = "[[-25, -3], [-10, 41], [20, -10], [-5, 15]]";
+        private string _poly1 = "[[-20, 5], [-10, 15], [15, 15], [-5, 0]]";
+        private string _poly2 = "[[-12, -3], [-5, 21], [10, -10], [-5, 15]]";
 
         public string Poly1
         {
