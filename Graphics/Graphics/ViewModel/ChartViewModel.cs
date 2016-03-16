@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Graphics.Model;
+using SharpDX;
 using Color = System.Drawing.Color;
 using FlowDirection = System.Windows.Forms.FlowDirection;
 using PixelFormat = System.Windows.Media.PixelFormat;

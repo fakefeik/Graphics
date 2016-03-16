@@ -21,7 +21,9 @@ namespace Graphics.ViewModel
                         new TaskViewModel($"Task {x}",
                             new RelayCommand(o => CurrentViewModel = new ChartViewModel($"Task{x}")))).ToList();
             tasks.Add(new TaskViewModel("Task 4", new RelayCommand(o => CurrentViewModel = new PolyViewModel("Task4"))));
-            tasks.AddRange(Enumerable.Range(5, 2).Select(x => new TaskViewModel($"Task {x}", new RelayCommand(o => CurrentViewModel = new RendererViewModel($"Task{x}")))));
+            tasks.Add(new TaskViewModel("Task 5", new RelayCommand(o => CurrentViewModel = new PlotViewModel("Task5"))));
+            tasks.Add(new TaskViewModel("Task 6", new RelayCommand(o => CurrentViewModel = new RendererViewModel("Task6"))));
+            //tasks.AddRange(Enumerable.Range(5, 2).Select(x => new TaskViewModel($"Task {x}", new RelayCommand(o => CurrentViewModel = new RendererViewModel($"Task{x}")))));
             return tasks;
         }
 

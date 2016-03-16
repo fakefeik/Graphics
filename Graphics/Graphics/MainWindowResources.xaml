@@ -13,7 +13,10 @@
     <DataTemplate DataType="{x:Type vm:PolyViewModel}">
         <vw:PolyView></vw:PolyView>
     </DataTemplate>
-
+    <DataTemplate DataType="{x:Type vm:PlotViewModel}">
+        <vw:PlotView></vw:PlotView>
+    </DataTemplate>
+    
     <DataTemplate x:Key="TasksTemplate">
         <StackPanel Background="Gray">
             <StackPanel.Resources>

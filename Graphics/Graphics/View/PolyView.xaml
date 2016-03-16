@@ -33,9 +33,9 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0">
                 <TextBlock Text="Polygon 1"/>
-                <TextBox Name="Poly1" Text="{Binding Poly1}"/>
+                <TextBox Text="{Binding Poly1}"/>
                 <TextBlock Text="Polygon 2"/>
-                <TextBox Name="Poly2" Text="{Binding Poly2}"/>
+                <TextBox Text="{Binding Poly2}"/>
             </StackPanel>
             <Image Grid.Column="1" Source="{Binding ImageName}"/>
         </Grid>
